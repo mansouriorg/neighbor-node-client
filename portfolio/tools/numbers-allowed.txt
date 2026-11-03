@@ -1,0 +1,9 @@
+# Numbers that the texts may use although facts.txt does not hold them.
+# One per line: the number, a space, the file that contains it, then a few words on why.
+# The checker looks in that file, and complains if the number is not there.
+# Version numbers of packages are allowed by themselves: they come from package.json.
+3000 README.md the address of the site in development, http://localhost:3000
+20.9 README.md the oldest Node.js version that Next.js 16 asks for
+256 lib/manage-key.ts SHA-256, the name of the hash function
+32 lib/manage-key.ts the key is 32 random bytes
+64 lib/manage-key.ts the key is written as 64 characters

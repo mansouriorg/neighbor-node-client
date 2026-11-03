@@ -1,0 +1,16 @@
+{
+  "name": "",
+  "role": "",
+  "readers": "",
+  "language": "English",
+  "tone": "clear, concrete, professional, no hype",
+  "links": {
+    "github": "",
+    "live_demo": "",
+    "linkedin": "",
+    "video": ""
+  },
+  "demo_login": "none: this app has no accounts and no sign-in",
+  "pages_to_show": "",
+  "note": "Fill in what you want the texts to use. An empty field becomes a TODO in the texts. This file is never overwritten by the tools."
+}

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" width="1200" height="620" role="img" aria-labelledby="t d" font-family="Helvetica, Arial, sans-serif">
+  <title id="t">How the parts of Neighbor Node fit together</title>
+  <desc id="d">The browser opens the pages and sends forms to the server actions. The server actions use the rules and the post store. The post store writes data/posts.json. A moderation script works on the same file.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2b4c7e"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="620" fill="#ffffff"/>
+  <text x="40" y="26" font-size="15" fill="#555555">Arrows show what calls what. Boxes name the folder or file in the project.</text>
+
+  <rect x="40" y="50" width="300" height="90" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="60" y="82" font-size="18" font-weight="bold" fill="#111111">The visitor's browser</text>
+  <text x="60" y="108" font-size="14" fill="#333333">Forms and buttons from components/</text>
+  <text x="60" y="126" font-size="14" fill="#333333">No account, no sign-in</text>
+
+  <rect x="450" y="50" width="300" height="90" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="470" y="82" font-size="18" font-weight="bold" fill="#111111">Pages in app/</text>
+  <text x="470" y="108" font-size="14" fill="#333333">5 pages, drawn on the server</text>
+  <text x="470" y="126" font-size="14" fill="#333333">The posts are read from the posts file</text>
+
+  <rect x="450" y="200" width="300" height="112" rx="12" fill="#eaf1fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="470" y="232" font-size="18" font-weight="bold" fill="#111111">Server actions</text>
+  <text x="470" y="258" font-size="14" fill="#333333">9 server actions in 7 files in app/</text>
+  <text x="470" y="276" font-size="14" fill="#333333">Anyone can call them, so each one</text>
+  <text x="470" y="294" font-size="14" fill="#333333">checks every rule again</text>
+
+  <rect x="850" y="200" width="300" height="112" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="870" y="232" font-size="18" font-weight="bold" fill="#111111">Rules in lib/</text>
+  <text x="870" y="258" font-size="14" fill="#333333">Every field is checked on the server</text>
+  <text x="870" y="276" font-size="14" fill="#333333">The private key is kept only as a</text>
+  <text x="870" y="294" font-size="14" fill="#333333">SHA-256 fingerprint</text>
+
+  <rect x="850" y="50" width="300" height="90" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="870" y="82" font-size="18" font-weight="bold" fill="#111111">Speed limits</text>
+  <text x="870" y="108" font-size="14" fill="#333333">5 live counters in lib/</text>
+  <text x="870" y="126" font-size="14" fill="#333333">Kept in the memory of the running server</text>
+
+  <rect x="450" y="370" width="300" height="112" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="470" y="402" font-size="18" font-weight="bold" fill="#111111">Post store</text>
+  <text x="470" y="428" font-size="14" fill="#333333">lib/post-store.ts</text>
+  <text x="470" y="446" font-size="14" fill="#333333">Writes a temporary file, then renames it</text>
+  <text x="470" y="464" font-size="14" fill="#333333">At most 500 posts</text>
+
+  <rect x="450" y="530" width="300" height="70" rx="12" fill="#fff6e0" stroke="#8a6a1f" stroke-width="2"/>
+  <text x="470" y="562" font-size="18" font-weight="bold" fill="#111111">data/posts.json</text>
+  <text x="470" y="584" font-size="14" fill="#333333">One file, no database</text>
+
+  <rect x="40" y="530" width="300" height="70" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2"/>
+  <text x="60" y="562" font-size="18" font-weight="bold" fill="#111111">scripts/moderate.mjs</text>
+  <text x="60" y="584" font-size="14" fill="#333333">Previews by default, copies the file first</text>
+
+  <rect x="850" y="530" width="300" height="70" rx="12" fill="#f4f6fb" stroke="#2b4c7e" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="870" y="562" font-size="18" font-weight="bold" fill="#111111">__tests__/</text>
+  <text x="870" y="584" font-size="14" fill="#333333">125 test files, run in jsdom</text>
+
+  <g fill="none" stroke="#2b4c7e" stroke-width="2" marker-end="url(#arrow)">
+    <path d="M340 95 H450"/>
+    <path d="M190 140 V250 H450"/>
+    <path d="M750 250 H850"/>
+    <path d="M1000 200 V140"/>
+    <path d="M600 312 V370"/>
+    <path d="M600 482 V530"/>
+    <path d="M340 565 H450"/>
+  </g>
+  <path d="M1000 530 V312" fill="none" stroke="#2b4c7e" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+  <g font-size="13" fill="#2b4c7e">
+    <text x="372" y="86">opens</text>
+    <text x="205" y="238">sends a form</text>
+    <text x="768" y="240">asks</text>
+    <text x="1010" y="176">counts</text>
+    <text x="612" y="340">saves and reads</text>
+    <text x="612" y="506">writes</text>
+    <text x="1010" y="420">tests call the code</text>
+  </g>
+</svg>

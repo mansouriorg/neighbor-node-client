@@ -1,0 +1,263 @@
+import { readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { expect, test } from "vitest";
+import type { ValidNewPost } from "@/lib/new-post";
+import { addPost } from "@/lib/post-store";
+import {
+  createReportLimits,
+  defaultReportLimitSettings,
+  reportPostWithinLimits,
+  type ReportLimits,
+} from "@/lib/report-limits";
+import { useTempFolders } from "./support/temp-folders";
+
+const makeFolder = useTempFolders("report-limits-");
+
+const noon = new Date(2026, 9, 25, 12, 0, 0);
+const oneMinute = 60 * 1000;
+
+function after(minutes: number, seconds: number = 0): Date {
+  return new Date(noon.getTime() + minutes * oneMinute + seconds * 1000);
+}
+
+const sofa: ValidNewPost = {
+  kind: "help",
+  title: "Help moving a sofa",
+  details: "Saturday morning, two people, about an hour.",
+  area: "Olive Street",
+};
+
+// Saves a post and gives back its id.
+async function save(file: string): Promise<string> {
+  const result = await addPost(sofa, file, noon);
+  if (result.ok === false) throw new Error("The board of the test is full.");
+  return result.post.id;
+}
+
+// A counter that allows 3 reports in 10 minutes, so the tests stay short.
+function smallLimits(): ReportLimits {
+  return createReportLimits({ reports: 3, windowMinutes: 10 });
+}
+
+// Runs something that logs an error, and keeps the log out of the test output.
+async function quietly<T>(run: () => Promise<T>) {
+  const original = console.error;
+  const logged: unknown[][] = [];
+  console.error = (...args: unknown[]) => {
+    logged.push(args);
+  };
+  try {
+    return { value: await run(), logged };
+  } finally {
+    console.error = original;
+  }
+}
+
+// ---------- the counter
+
+test("the default is 5 reports in an hour", () => {
+  expect(defaultReportLimitSettings).toEqual({ reports: 5, windowMinutes: 60 });
+  const limits = createReportLimits();
+  let allowed = 0;
+  for (let index = 0; index < 12; index += 1) {
+    if (limits.take("someone", noon).ok) allowed += 1;
+  }
+  expect(allowed).toBe(5);
+  expect(limits.take("someone", noon)).toEqual({ ok: false, minutes: 60 });
+});
+
+test("numbers that make no sense are refused when the counter is made", () => {
+  expect(() => createReportLimits({ reports: 0, windowMinutes: 10 })).toThrow("whole number");
+  expect(() => createReportLimits({ reports: 3, windowMinutes: 0 })).toThrow("whole number");
+  expect(() => createReportLimits(defaultReportLimitSettings, 0)).toThrow("whole number");
+});
+
+test("the wait is told in whole minutes, rounded up, and gets shorter as time passes", () => {
+  const limits = smallLimits();
+  for (let index = 0; index < 3; index += 1) limits.take("someone", noon);
+  expect(limits.take("someone", noon)).toEqual({ ok: false, minutes: 10 });
+  expect(limits.take("someone", after(4, 30))).toEqual({ ok: false, minutes: 6 });
+  expect(limits.take("someone", after(9, 59))).toEqual({ ok: false, minutes: 1 });
+  expect(limits.take("someone", after(10)).ok).toBe(true);
+});
+
+test("visitors are counted apart", () => {
+  const limits = smallLimits();
+  for (let index = 0; index < 3; index += 1) limits.take("first", noon);
+  expect(limits.take("first", noon).ok).toBe(false);
+  expect(limits.take("second", noon).ok).toBe(true);
+});
+
+test("only the most recent visitors are remembered", () => {
+  const limits = createReportLimits({ reports: 1, windowMinutes: 10 }, 2);
+  expect(limits.take("a", noon).ok).toBe(true);
+  expect(limits.take("b", noon).ok).toBe(true);
+  expect(limits.take("c", noon).ok).toBe(true);
+  // "a" was forgotten to make room, so it starts again. "c" is still counted.
+  expect(limits.take("a", noon).ok).toBe(true);
+  expect(limits.take("c", noon).ok).toBe(false);
+});
+
+test("by default many visitors are remembered at once, and the one unused for longest is forgotten first", () => {
+  const limits = createReportLimits();
+  for (let visitor = 0; visitor <= 5000; visitor += 1) {
+    for (let place = 0; place < 5; place += 1) limits.take(`visitor-${visitor}`, noon);
+  }
+  // 5001 visitors came, so the first one was forgotten and starts again.
+  expect(limits.take("visitor-0", noon).ok).toBe(true);
+  expect(limits.take("visitor-2", noon).ok).toBe(false);
+  expect(limits.take("visitor-5000", noon).ok).toBe(false);
+});
+
+// ---------- which tries count
+
+test("every try counts, whatever the answer, except one that fails on our side", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  const saved = await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  const missing = await reportPostWithinLimits("post-nothing", "spam", "someone", limits, file, noon);
+  const invalid = await reportPostWithinLimits(id, "rude", "someone", limits, file, noon);
+  expect(saved).toEqual({ status: "reported" });
+  expect(missing).toEqual({ status: "not-found" });
+  expect(invalid).toEqual({ status: "invalid" });
+  const fourth = await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  expect(fourth).toEqual({ status: "limited", minutes: 10 });
+});
+
+test("a try with an id of the wrong shape counts too", async () => {
+  const folder = await makeFolder();
+  const limits = smallLimits();
+  for (let index = 0; index < 3; index += 1) {
+    const answer = await reportPostWithinLimits(undefined, "spam", "someone", limits, folder, noon);
+    expect(answer).toEqual({ status: "not-found" });
+  }
+  const fourth = await reportPostWithinLimits(undefined, "spam", "someone", limits, folder, noon);
+  expect(fourth).toEqual({ status: "limited", minutes: 10 });
+});
+
+test("a report about a post that already has enough reports counts too", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = createReportLimits({ reports: 30, windowMinutes: 10 });
+  for (let index = 0; index < 20; index += 1) {
+    await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  }
+  expect(await reportPostWithinLimits(id, "spam", "someone", limits, file, noon)).toEqual({ status: "enough" });
+  for (let index = 0; index < 9; index += 1) {
+    await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  }
+  expect((await reportPostWithinLimits(id, "spam", "someone", limits, file, noon)).status).toBe("limited");
+});
+
+test("a try that fails on our side gives its place back", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const good = await readFile(file, "utf8");
+  const limits = smallLimits();
+  await writeFile(file, "{ not json", "utf8");
+  const { value, logged } = await quietly(async () => {
+    const answers = [];
+    for (let index = 0; index < 5; index += 1) {
+      answers.push(await reportPostWithinLimits(id, "spam", "someone", limits, file, noon));
+    }
+    return answers;
+  });
+  expect(value.map((answer) => answer.status)).toEqual(["failed", "failed", "failed", "failed", "failed"]);
+  expect(logged.length).toBe(5);
+  await writeFile(file, good, "utf8");
+  expect(await reportPostWithinLimits(id, "spam", "someone", limits, file, noon)).toEqual({ status: "reported" });
+});
+
+// ---------- what a limited visitor gets
+
+test("a visitor with no place left is refused before the file is opened, and nothing is changed", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  for (let index = 0; index < 3; index += 1) {
+    await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  }
+  const before = await readFile(file, "utf8");
+  const refused = { status: "limited", minutes: 10 };
+  expect(await reportPostWithinLimits(id, "scam", "someone", limits, file, noon)).toEqual(refused);
+  expect(await readFile(file, "utf8")).toBe(before);
+  // A folder in place of the file would give "failed" if it were opened.
+  const folder = await makeFolder();
+  expect(await reportPostWithinLimits(id, "scam", "someone", limits, folder, noon)).toEqual(refused);
+});
+
+test("a limited visitor can report again when the time has passed", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  for (let index = 0; index < 3; index += 1) {
+    await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  }
+  expect((await reportPostWithinLimits(id, "spam", "someone", limits, file, after(9))).status).toBe("limited");
+  expect((await reportPostWithinLimits(id, "spam", "someone", limits, file, after(10))).status).toBe("reported");
+});
+
+test("another visitor is not held back by a limited one", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  for (let index = 0; index < 4; index += 1) {
+    await reportPostWithinLimits(id, "spam", "noisy", limits, file, noon);
+  }
+  expect((await reportPostWithinLimits(id, "spam", "noisy", limits, file, noon)).status).toBe("limited");
+  expect((await reportPostWithinLimits(id, "spam", "quiet", limits, file, noon)).status).toBe("reported");
+});
+
+test("tries stop counting one by one, as their time runs out", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  async function send(at: Date) {
+    return reportPostWithinLimits(id, "spam", "someone", limits, file, at);
+  }
+  expect((await send(noon)).status).toBe("reported");
+  expect((await send(noon)).status).toBe("reported");
+  expect((await send(after(6))).status).toBe("reported");
+  expect(await send(after(9))).toEqual({ status: "limited", minutes: 1 });
+  // At 10 minutes the first two are over, and the one from minute 6 still counts.
+  expect((await send(after(10))).status).toBe("reported");
+  expect((await send(after(10))).status).toBe("reported");
+  expect(await send(after(10))).toEqual({ status: "limited", minutes: 6 });
+});
+
+test("reports sent at the same moment cannot all slip through", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  const answers = await Promise.all(
+    Array.from({ length: 20 }, () =>
+      reportPostWithinLimits(id, "spam", "someone", limits, file, noon),
+    ),
+  );
+  expect(answers.filter((answer) => answer.status === "reported").length).toBe(3);
+  expect(answers.filter((answer) => answer.status === "limited").length).toBe(17);
+  const saved = JSON.parse(await readFile(file, "utf8")).posts[0].reports;
+  expect(saved.length).toBe(3);
+});
+
+test("the file and the time are handed on to the logic", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  await reportPostWithinLimits(id, "private", "someone", limits, file, after(7));
+  const saved = JSON.parse(await readFile(file, "utf8")).posts[0].reports;
+  expect(saved).toEqual([{ reason: "private", at: after(7).toISOString() }]);
+});
+
+test("the answer to a limited visitor is plain data with two fields", async () => {
+  const file = join(await makeFolder(), "posts.json");
+  const id = await save(file);
+  const limits = smallLimits();
+  for (let index = 0; index < 3; index += 1) {
+    await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  }
+  const refused = await reportPostWithinLimits(id, "spam", "someone", limits, file, noon);
+  expect(JSON.parse(JSON.stringify(refused))).toEqual(refused);
+  expect(Object.keys(refused).sort()).toEqual(["minutes", "status"]);
+});

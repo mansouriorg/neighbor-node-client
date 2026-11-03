@@ -36,6 +36,15 @@ yarn-error.log*
 # vercel
 .vercel
 
+# update backups
+.update-backup/
+
+# npm cache kept inside the project
+.npm-cache/
+
+# saved posts (the board keeps its posts here, so git must not hold them)
+/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

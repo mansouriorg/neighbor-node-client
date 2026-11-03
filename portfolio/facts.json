@@ -1,0 +1,526 @@
+{
+  "counted_on": "2026-11-01",
+  "note": "Every number was counted by the command written next to it, inside the project folder. Left out of every count: node_modules, hidden folders, data/, portfolio/, coverage/ and *.d.ts files.",
+  "project": {
+    "name": "neighbor-node",
+    "version": "0.1.0",
+    "type": "Web app: one Next.js project that holds the pages, the server actions and the storage, plus a small command-line tool for the person who runs the site.",
+    "languages": [
+      "TypeScript",
+      "CSS",
+      "JavaScript (one Node.js script)"
+    ],
+    "packages": {
+      "dependencies": {
+        "next": "16.2.1",
+        "react": "19.2.4",
+        "react-dom": "19.2.4"
+      },
+      "devDependencies": {
+        "@tailwindcss/postcss": "^4",
+        "@testing-library/dom": "10.4.2",
+        "@testing-library/react": "16.3.3",
+        "@types/node": "24.19.2",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "@vitejs/plugin-react": "6.1.2",
+        "eslint": "^9",
+        "eslint-config-next": "16.2.1",
+        "jsdom": "30.1.3",
+        "tailwindcss": "^4",
+        "typescript": "^5",
+        "vite-tsconfig-paths": "6.1.1",
+        "vitest": "5.0.5"
+      }
+    },
+    "storage": "One JSON file (data/posts.json). No database.",
+    "problem": "Neighbors need a simple place to ask for help, offer help and lend things, without accounts and without showing an exact address.",
+    "who_uses_it": "People who live near each other (from README.md).",
+    "where_to_see_it": {
+      "address_in_development": "http://localhost:3000",
+      "routes": [
+        {
+          "route": "/",
+          "file": "app/page.tsx"
+        },
+        {
+          "route": "/board",
+          "file": "app/board/page.tsx"
+        },
+        {
+          "route": "/board/[id]",
+          "file": "app/board/[id]/page.tsx"
+        },
+        {
+          "route": "/board/[id]/manage",
+          "file": "app/board/[id]/manage/page.tsx"
+        },
+        {
+          "route": "/board/new",
+          "file": "app/board/new/page.tsx"
+        },
+        {
+          "route": "/opengraph-image",
+          "file": "app/opengraph-image.tsx"
+        },
+        {
+          "route": "/robots.txt",
+          "file": "app/robots.ts"
+        },
+        {
+          "route": "/sitemap.xml",
+          "file": "app/sitemap.ts"
+        }
+      ]
+    },
+    "how_to_run": {
+      "quick_start": [
+        "npm install",
+        "npm run dev"
+      ],
+      "scripts": [
+        "dev: next dev",
+        "build: next build",
+        "start: next start",
+        "lint: eslint",
+        "typecheck: tsc --noEmit",
+        "test: vitest run",
+        "test:watch: vitest"
+      ],
+      "settings": [
+        "SITE_URL",
+        "POSTS_PER_HOUR",
+        "POSTS_PER_HOUR_SITE"
+      ]
+    }
+  },
+  "features": [
+    {
+      "text": "Read the board of posts and filter it by kind (Help wanted, Offer, Lend)",
+      "evidence": "app/board/page.tsx",
+      "evidence_exists": true
+    },
+    {
+      "text": "Write a post; the server checks it again before it saves it to one JSON file",
+      "evidence": "app/board/new/actions.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "No accounts: each post gets a secret key, and only a SHA-256 fingerprint of it is saved",
+      "evidence": "lib/manage-key.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "A private page for the author: edit the post, change its status, read replies, see report counts, take it down",
+      "evidence": "app/board/[id]/manage/page.tsx",
+      "evidence_exists": true
+    },
+    {
+      "text": "A post nobody touches for 30 days is hidden from the board, never deleted; the author can keep it up",
+      "evidence": "lib/post-age.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "Neighbors reply privately; only the author reads the replies",
+      "evidence": "app/board/[id]/reply-actions.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "Visitors report a post with a reason, never a name",
+      "evidence": "app/board/[id]/actions.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "Speed limits on every public action, counted in the memory of the running server",
+      "evidence": "lib/rate-limit.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "A command-line tool that lists reports and takes posts down, with a backup first",
+      "evidence": "scripts/moderate.mjs",
+      "evidence_exists": true
+    },
+    {
+      "text": "Light and dark theme from CSS variables",
+      "evidence": "app/globals.css",
+      "evidence_exists": true
+    },
+    {
+      "text": "Safe headers on every page, and no X-Powered-By header",
+      "evidence": "next.config.ts",
+      "evidence_exists": true
+    },
+    {
+      "text": "A share image that is drawn when the site is built",
+      "evidence": "app/opengraph-image.tsx",
+      "evidence_exists": true
+    },
+    {
+      "text": "robots.txt and a sitemap that leaves out every post",
+      "evidence": "app/sitemap.ts",
+      "evidence_exists": true
+    }
+  ],
+  "numbers": {
+    "files_ts": {
+      "what": "TypeScript files (.ts)",
+      "value": 112,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.ts' -not -name '*.d.ts' -not -name '*.d.mts' -print | wc -l"
+    },
+    "files_tsx": {
+      "what": "React files (.tsx)",
+      "value": 93,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.tsx' -print | wc -l"
+    },
+    "files_mts": {
+      "what": "TypeScript module files (.mts)",
+      "value": 1,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.mts' -not -name '*.d.ts' -not -name '*.d.mts' -print | wc -l"
+    },
+    "files_mjs": {
+      "what": "JavaScript module files (.mjs)",
+      "value": 3,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.mjs' -print | wc -l"
+    },
+    "files_css": {
+      "what": "Style sheets (.css)",
+      "value": 1,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.css' -print | wc -l"
+    },
+    "lines_ts": {
+      "what": "Lines in .ts files",
+      "value": 12415,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.ts' -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "lines_tsx": {
+      "what": "Lines in .tsx files",
+      "value": 10337,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.tsx' -exec cat {} + | wc -l"
+    },
+    "lines_mts": {
+      "what": "Lines in .mts files",
+      "value": 13,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.mts' -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "lines_mjs": {
+      "what": "Lines in .mjs files",
+      "value": 535,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.mjs' -exec cat {} + | wc -l"
+    },
+    "lines_css": {
+      "what": "Lines in .css files",
+      "value": 138,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f -name '*.css' -exec cat {} + | wc -l"
+    },
+    "files_code": {
+      "what": "Code files (.ts, .tsx, .mts, .mjs)",
+      "value": 209,
+      "command": "sum of: files_ts files_tsx files_mts files_mjs"
+    },
+    "lines_code": {
+      "what": "Lines of code (.ts, .tsx, .mts, .mjs), blank lines and comments included",
+      "value": 23300,
+      "command": "sum of: lines_ts lines_tsx lines_mts lines_mjs"
+    },
+    "files_app": {
+      "what": "Code files in app/",
+      "value": 20,
+      "command": "find app -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' | wc -l"
+    },
+    "lines_app": {
+      "what": "Lines of code in app/",
+      "value": 1012,
+      "command": "find app -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "files_components": {
+      "what": "Code files in components/",
+      "value": 24,
+      "command": "find components -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' | wc -l"
+    },
+    "lines_components": {
+      "what": "Lines of code in components/",
+      "value": 3143,
+      "command": "find components -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "files_lib": {
+      "what": "Code files in lib/",
+      "value": 33,
+      "command": "find lib -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' | wc -l"
+    },
+    "lines_lib": {
+      "what": "Lines of code in lib/",
+      "value": 2630,
+      "command": "find lib -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "files_tests": {
+      "what": "Code files in __tests__/",
+      "value": 126,
+      "command": "find __tests__ -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' | wc -l"
+    },
+    "lines_tests": {
+      "what": "Lines of code in __tests__/",
+      "value": 15930,
+      "command": "find __tests__ -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "files_scripts": {
+      "what": "Code files in scripts/",
+      "value": 1,
+      "command": "find scripts -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' | wc -l"
+    },
+    "lines_scripts": {
+      "what": "Lines of code in scripts/",
+      "value": 508,
+      "command": "find scripts -type f \\( -name '*.ts' -o -name '*.tsx' -o -name '*.mts' -o -name '*.mjs' \\) -not -name '*.d.ts' -not -name '*.d.mts' -exec cat {} + | wc -l"
+    },
+    "pages": {
+      "what": "Pages (page.tsx files in app/)",
+      "value": 5,
+      "command": "find app -type f -name 'page.tsx' | wc -l"
+    },
+    "error_pages": {
+      "what": "Error and not-found pages in app/",
+      "value": 4,
+      "command": "find app -type f \\( -name 'not-found.tsx' -o -name 'error.tsx' -o -name 'global-error.tsx' \\) | wc -l"
+    },
+    "route_handlers": {
+      "what": "API route handlers (route.ts files in app/)",
+      "value": 0,
+      "command": "find app -type f \\( -name 'route.ts' -o -name 'route.tsx' \\) | wc -l"
+    },
+    "server_action_files": {
+      "what": "Files in app/ that are server actions",
+      "value": 7,
+      "command": "grep -rl '\"use server\"' app | wc -l"
+    },
+    "server_actions": {
+      "what": "Server actions (exported async functions in the files that are server actions)",
+      "value": 9,
+      "command": "grep -rl '\"use server\"' app | while read -r f; do grep -h '^export async function' \"$f\"; done | wc -l"
+    },
+    "database_files": {
+      "what": "Database files (.sql, schema.prisma, .db, .sqlite)",
+      "value": 0,
+      "command": "find . \\( -type d \\( -name '.?*' -o -name node_modules -o -name data -o -name portfolio -o -name coverage \\) -prune \\) -o -type f \\( -name '*.sql' -o -name 'schema.prisma' -o -name '*.db' -o -name '*.sqlite' \\) -print | wc -l"
+    },
+    "components_tsx": {
+      "what": "Component files (.tsx in components/)",
+      "value": 21,
+      "command": "find components -type f -name '*.tsx' | wc -l"
+    },
+    "lib_modules": {
+      "what": "Modules in lib/ (.ts)",
+      "value": 33,
+      "command": "find lib -type f -name '*.ts' -not -name '*.d.ts' -not -name '*.d.mts' | wc -l"
+    },
+    "limit_rule_files": {
+      "what": "Speed-limit rule files in lib/ (*-limits.ts, without live-*)",
+      "value": 7,
+      "command": "find lib -type f -name '*-limits.ts' -not -name 'live-*' | wc -l"
+    },
+    "limit_counter_files": {
+      "what": "Speed-limit counters in lib/ (live-*-limits.ts)",
+      "value": 5,
+      "command": "find lib -type f -name 'live-*-limits.ts' | wc -l"
+    },
+    "icons": {
+      "what": "Icons drawn in components/icons.tsx",
+      "value": 21,
+      "command": "grep -cE '^  [a-zA-Z]+: [(<]' components/icons.tsx"
+    },
+    "security_headers": {
+      "what": "Security headers set in next.config.ts",
+      "value": 5,
+      "command": "grep -c 'key: \"' next.config.ts"
+    },
+    "aria_attributes": {
+      "what": "aria-* attributes written in app/ and components/",
+      "value": 79,
+      "command": "grep -rhoE 'aria-[a-z]+=' app components | wc -l"
+    },
+    "post_kinds": {
+      "what": "Kinds of post",
+      "value": 3,
+      "command": "awk '/export const postKindIds/ { go = 1 } go { print } go && /as const/ { exit }' lib/post-kinds.ts | grep -o '\"[a-z-]*\"' | wc -l"
+    },
+    "post_statuses": {
+      "what": "Statuses of a post",
+      "value": 3,
+      "command": "awk '/export const postStatusIds/ { go = 1 } go { print } go && /as const/ { exit }' lib/posts.ts | grep -o '\"[a-z-]*\"' | wc -l"
+    },
+    "report_reasons": {
+      "what": "Reasons for a report",
+      "value": 5,
+      "command": "awk '/export const reportReasonIds/ { go = 1 } go { print } go && /as const/ { exit }' lib/report-reasons.ts | grep -o '\"[a-z-]*\"' | wc -l"
+    },
+    "sample_posts": {
+      "what": "Made-up sample posts in lib/posts.ts",
+      "value": 9,
+      "command": "grep -c 'id: \"sample-' lib/posts.ts"
+    },
+    "hide_after_days": {
+      "what": "Days after which a post that nobody touched is hidden",
+      "value": 30,
+      "command": "sed -n 's/^export const hideAfterDays = \\([0-9]*\\);.*/\\1/p' lib/post-age.ts"
+    },
+    "saved_posts_limit": {
+      "what": "Posts the file may hold",
+      "value": 500,
+      "command": "sed -n 's/^export const savedPostsLimit = \\([0-9]*\\);.*/\\1/p' lib/post-store.ts"
+    },
+    "reports_kept_per_post": {
+      "what": "Reports kept for one post",
+      "value": 20,
+      "command": "sed -n 's/^export const reportsKeptPerPost = \\([0-9]*\\);.*/\\1/p' lib/post-store.ts"
+    },
+    "replies_kept_per_post": {
+      "what": "Replies kept for one post",
+      "value": 20,
+      "command": "sed -n 's/^export const repliesKeptPerPost = \\([0-9]*\\);.*/\\1/p' lib/new-reply.ts"
+    },
+    "post_limit_per_visitor": {
+      "what": "Posts one visitor may save in an hour",
+      "value": 5,
+      "command": "sed -n 's/^  perVisitor: \\([0-9]*\\),.*/\\1/p' lib/post-limits.ts | head -n 1"
+    },
+    "post_limit_per_site": {
+      "what": "Posts the whole site accepts in an hour",
+      "value": 60,
+      "command": "sed -n 's/^  perSite: \\([0-9]*\\),.*/\\1/p' lib/post-limits.ts | head -n 1"
+    },
+    "manage_wrong_tries": {
+      "what": "Wrong tries on a private page, for one visitor",
+      "value": 10,
+      "command": "sed -n 's/^  wrongTries: \\([0-9]*\\),.*/\\1/p' lib/manage-limits.ts | head -n 1"
+    },
+    "manage_window_minutes": {
+      "what": "Minutes a wrong try on a private page counts",
+      "value": 10,
+      "command": "sed -n 's/^  windowMinutes: \\([0-9]*\\),.*/\\1/p' lib/manage-limits.ts | head -n 1"
+    },
+    "replies_per_hour": {
+      "what": "Replies one visitor may send in an hour",
+      "value": 10,
+      "command": "sed -n 's/^  replies: \\([0-9]*\\),.*/\\1/p' lib/reply-limits.ts | head -n 1"
+    },
+    "test_files": {
+      "what": "Test files (*.test.ts and *.test.tsx in __tests__/)",
+      "value": 125,
+      "command": "find __tests__ -type f \\( -name '*.test.ts' -o -name '*.test.tsx' \\) | wc -l"
+    },
+    "test_files_logic": {
+      "what": "Test files for rules and storage (*.test.ts)",
+      "value": 64,
+      "command": "find __tests__ -type f -name '*.test.ts' | wc -l"
+    },
+    "test_files_components": {
+      "what": "Test files for pages and components (*.test.tsx)",
+      "value": 61,
+      "command": "find __tests__ -type f -name '*.test.tsx' | wc -l"
+    },
+    "test_definitions": {
+      "what": "Tests written (lines that start a test or it call in __tests__/)",
+      "value": 1068,
+      "command": "grep -rEh '^[[:space:]]*(test|it)\\(' __tests__ | wc -l"
+    },
+    "dependencies": {
+      "what": "Packages in dependencies (package.json)",
+      "value": 3,
+      "command": "node -e \"console.log(Object.keys(require('./package.json').dependencies).length)\""
+    },
+    "dev_dependencies": {
+      "what": "Packages in devDependencies (package.json)",
+      "value": 14,
+      "command": "node -e \"console.log(Object.keys(require('./package.json').devDependencies).length)\""
+    },
+    "readme_lines": {
+      "what": "Lines in README.md",
+      "value": 340,
+      "command": "wc -l < README.md"
+    },
+    "readme_sections": {
+      "what": "Sections (## headings) in README.md",
+      "value": 17,
+      "command": "grep -c '^## ' README.md"
+    }
+  },
+  "lists": {
+    "pages_list": {
+      "what": "Pages (page.tsx files in app/)",
+      "items": [
+        "app/board/[id]/manage/page.tsx",
+        "app/board/[id]/page.tsx",
+        "app/board/new/page.tsx",
+        "app/board/page.tsx",
+        "app/page.tsx"
+      ],
+      "command": "find app -type f -name 'page.tsx' | sort"
+    },
+    "special_files": {
+      "what": "Files in app/ that make robots.txt, the sitemap and the share image",
+      "items": [
+        "app/opengraph-image.tsx",
+        "app/robots.ts",
+        "app/sitemap.ts"
+      ],
+      "command": "find app -maxdepth 1 -type f \\( -name 'robots.ts' -o -name 'sitemap.ts' -o -name 'opengraph-image.tsx' \\) | sort"
+    },
+    "server_action_list": {
+      "what": "Server actions (exported async functions in the files that are server actions)",
+      "items": [
+        "changePostStatus",
+        "checkManageLink",
+        "editPost",
+        "loadReplies",
+        "removePost",
+        "renewPost",
+        "replyToPost",
+        "reportPost",
+        "savePost"
+      ],
+      "command": "grep -rl '\"use server\"' app | while read -r f; do grep -hoE '^export async function [A-Za-z]+' \"$f\"; done | sed 's/^export async function //' | sort"
+    },
+    "npm_scripts": {
+      "what": "Scripts in package.json",
+      "items": [
+        "dev: next dev",
+        "build: next build",
+        "start: next start",
+        "lint: eslint",
+        "typecheck: tsc --noEmit",
+        "test: vitest run",
+        "test:watch: vitest"
+      ],
+      "command": "node -e \"const s=require('./package.json').scripts;for(const k of Object.keys(s))console.log(k+': '+s[k])\""
+    },
+    "quick_start": {
+      "what": "Quick start commands, as written in README.md",
+      "items": [
+        "npm install",
+        "npm run dev"
+      ],
+      "command": "sed -n '/^## Quick start/,/^| Command/p' README.md | grep '^    ' | sed 's/^    //'"
+    },
+    "dev_address": {
+      "what": "Address of the site in development, as written in README.md",
+      "items": [
+        "http://localhost:3000"
+      ],
+      "command": "grep -o 'http://localhost:[0-9]*' README.md | head -n 1"
+    },
+    "setting_names": {
+      "what": "Settings the server reads, as listed in README.md (names only)",
+      "items": [
+        "SITE_URL",
+        "POSTS_PER_HOUR",
+        "POSTS_PER_HOUR_SITE"
+      ],
+      "command": "sed -n 's/^| .\\([A-Z][A-Z_]*\\). |.*/\\1/p' README.md"
+    }
+  },
+  "not_counted": {
+    "commits_and_contributors": "TODO: this tool never runs the version-control program. Count them yourself if you want to show them.",
+    "test_run": "TODO: run the tests and write the summary line here. This tool counts the tests in the files; it does not run them.",
+    "build_and_lint_run": "TODO: run the build and the lint and write the result here.",
+    "live_demo": "TODO: there is no public demo yet. Write its address here when there is one."
+  }
+}
